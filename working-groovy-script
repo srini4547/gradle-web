@@ -1,0 +1,24 @@
+node{
+    stage("Git CheckOut"){
+        git credentialsId: 'github', url: 'https://github.com/srini4547/gradle-web.git'
+
+    }
+    
+    stage("build"){
+        def ghome = tool name: 'g-4', type: 'gradle'
+        def gcmd  = "${ghome}/gradle"
+        sh "${gcmd} clean build"
+    }
+    stage("Build Docker Image")
+    {
+        sh 'docker build -t srini4547/gradle-web-new .'
+    }
+    stage("Docker Hub login"){
+    withCredentials([string(credentialsId: 'Dock_log', variable: 'Dock_log')]) {
+    // some block
+     sh "docker login -u srini4547 -p ${Dock_log}"
+        }
+        sh "docker push srini4547/gradle-web-new"
+    }       
+       
+}
