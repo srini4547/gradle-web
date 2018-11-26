@@ -19,6 +19,14 @@ node{
      sh "docker login -u srini4547 -p ${Dock_log}"
         }
         sh "docker push srini4547/gradle-web-new"
-    }       
-       
+    }  
+    stage("deploy to server"){
+    def dockdep = 'docker run -d -p 8080:8080 --name java-app srini4547/gradle-web-new'
+    sshagent(['app-deploy']) {
+    sh ' ssh -o StrictHostKeyChecking=no ubuntu@10.20.20.38 docker stop java-app || true '
+    sh 'ssh ubuntu@10.20.20.38 docker rm java-app || true'
+    sh 'ssh ubuntu@10.20.20.38 docker rmi -f $(docker images -q) || true'
+    sh "ssh ubuntu@10.20.20.38 ${dockdep}"
+        }
+    }
 }
